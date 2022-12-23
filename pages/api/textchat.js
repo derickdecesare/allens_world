@@ -6,8 +6,9 @@ export default async function handler (req, res) {
 const { MessagingResponse } = require('twilio').twiml;
 const twiml = new MessagingResponse();
 
-console.log(req.body)
-res.status(200).send('success')
+console.log(req.body) 
+console.log(req.body.Body) //this is the message
+
 console.log('editing api')
     console.log('api started')
     const accountSid = process.env.TWILIO_ACCOUNT_SID
