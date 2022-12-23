@@ -4,7 +4,7 @@ import Head from 'next/head';
 function Chatbox() {
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState('');
-
+//test
   function handleSubmit(event) {
     event.preventDefault();
     console.log('submitting')
