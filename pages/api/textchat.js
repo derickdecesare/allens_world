@@ -1,8 +1,8 @@
-import { useState } from 'react';
+
 
 
 export default async function handler (req, res) {
-const [message, setMessage] = useState('');
+let message ='inital message'
 const { MessagingResponse } = require('twilio').twiml;
 const twiml = new MessagingResponse();
 
@@ -22,7 +22,7 @@ const incomingMessage = req.body.Body
     // .then(message => console.log(message.sid))
 
 
-    fetch('/api/openai', {
+    await fetch('https://allenwilldiefromai.com/api/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: incomingMessage }),
@@ -30,7 +30,7 @@ const incomingMessage = req.body.Body
         .then((res) => res.json())
         .then((data) => {
           if (data.status == 200) {
-          setMessage(data.message)
+          message = data.message
          }
       });
   
