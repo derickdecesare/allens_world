@@ -1,28 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { useTheme } from 'next-themes';
 
 function Chatbox() {
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState('');
+  const [mounted, setMounted] = useState(false);
+  // const [contextChat, setContextChat] = useState('')
+  const {theme, setTheme} = useTheme();
+  let contextChat = '';
+
+  useEffect(() => setMounted(true), [])
+  
 //test
   function handleSubmit(event) {
     event.preventDefault();
     console.log('submitting')
     // Make a request to the server to get the response
     // based on the message entered by the user
+    if (sessionStorage.getItem('contextChat')) {
+     contextChat = sessionStorage.getItem('contextChat')
+     console.log(sessionStorage.getItem('contextChat'))
+     console.log(`contextchat: $contextChat`)
+    } 
+
     
+
     fetch('/api/openai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, contextChat }),
     })
       .then((res) => res.json())
       .then((data) => {
         setResponse(data.message);
+        // setContextChat(`You: ${message}` + `AI: ${data.message}`);
+        if (sessionStorage.getItem('contextChat')) {
+        const storedString = sessionStorage.getItem('contextChat');
+        const updatedString = storedString + `  Allen: ${message}`+"?" + ` You: ${data.message}`
+        sessionStorage.setItem('contextChat', updatedString);
+        } else {
+          sessionStorage.setItem('contextChat', ` Allen: ${message}`+"?" + `  You: ${data.message}`);
+        }
       });
-      
+      setMessage('');
   }
 
+  // console.log(sessionStorage.getItem('contextChat'))
+
+  if (!mounted) return null
   return (
 <div>
   <Head>
@@ -40,8 +66,15 @@ function Chatbox() {
       <div className="mx-auto max-w-7xl py-3 px-3 sm:px-6 lg:px-8">
         <div className=" sm:px-16 text-center">
           <p className="font-medium text-white">
-            <span className=" inline ">An AI that knows Allen and definetly isn't built to scare you</span>
+            <span className=" inline ">Allen&apos;s Friendly AI</span>
+            <button 
+            className='fixed top-1 right-1 px-2 py-2 bg-teal-900 dark:bg-teal-200 text-white dark:text-black rounded-lg'
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            >
+            {theme ==='light' ? 'Dark' : 'Light'}
+          </button>
           </p>
+          
         </div> 
       </div>
     </div>
@@ -51,7 +84,7 @@ function Chatbox() {
       <h2 className='font-bold text-4xl text-center my-10'>Welcome To Allens World</h2>
       <div className="flex items-center border border-2 rounded-lg m-5 border-teal-500 py-2">
         <input
-          className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 px-2 focus:outline-none"
+          className="appearance-none bg-transparent border-none w-full dark:text-white text-gray-700 mr-3 px-2 focus:outline-none"
           type="text"
           placeholder="It's been waiting for you"
           aria-label="Prompt"
@@ -66,7 +99,7 @@ function Chatbox() {
         </button>
       </div>
       {response && (
-        <div className="px-5 py-3 mt-3 text-center text-gray-600">
+        <div className="px-5 py-3 mt-3 text-center text-gray-600 dark:text-white">
           <b>AI:</b> {response}
         </div>
       )}
