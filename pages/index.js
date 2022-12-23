@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useTheme } from 'next-themes';
+import {BiLoaderCircle} from 'react-icons/bi'
+
+
 
 function Chatbox() {
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState('');
   const [mounted, setMounted] = useState(false);
-  // const [contextChat, setContextChat] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false)
+  const [chatHistory, setChatHistory] = useState('')
   const {theme, setTheme} = useTheme();
   let contextChat = '';
 
@@ -16,32 +21,38 @@ function Chatbox() {
   function handleSubmit(event) {
     event.preventDefault();
     console.log('submitting')
+    setLoading(true);
     // Make a request to the server to get the response
     // based on the message entered by the user
-    if (sessionStorage.getItem('contextChat')) {
-     contextChat = sessionStorage.getItem('contextChat')
-     console.log(sessionStorage.getItem('contextChat'))
-     console.log(`contextchat: $contextChat`)
-    } 
+    // if (sessionStorage.getItem('contextChat')) {
+    //  contextChat = sessionStorage.getItem('contextChat')
+    //  console.log(sessionStorage.getItem('contextChat'))
+    //  console.log(`contextchat: $contextChat`)
+    // } 
 
     
 
     fetch('/api/openai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, contextChat }),
+      body: JSON.stringify({ message, chatHistory }),
     })
       .then((res) => res.json())
       .then((data) => {
+        if (data.status == 200) {
         setResponse(data.message);
+        
         // setContextChat(`You: ${message}` + `AI: ${data.message}`);
-        if (sessionStorage.getItem('contextChat')) {
-        const storedString = sessionStorage.getItem('contextChat');
-        const updatedString = storedString + `  Allen: ${message}`+"?" + ` You: ${data.message}`
-        sessionStorage.setItem('contextChat', updatedString);
-        } else {
-          sessionStorage.setItem('contextChat', ` Allen: ${message}`+"?" + `  You: ${data.message}`);
-        }
+        setLoading(false);
+        setChatHistory((prev)=> prev + `  Allen: ${message}`+"?" + ` You: ${data.message}`)
+        // if (sessionStorage.getItem('contextChat')) {
+        // const storedString = sessionStorage.getItem('contextChat');
+        // const updatedString = storedString + `  Allen: ${message}`+"?" + ` You: ${data.message}`
+        // sessionStorage.setItem('contextChat', updatedString);
+        // } else {
+        //   sessionStorage.setItem('contextChat', ` Allen: ${message}`+"?" + `  You: ${data.message}`);
+        // }
+        } else { setError(true) ; setLoading(false) }
       });
       setMessage('');
   }
@@ -81,7 +92,7 @@ function Chatbox() {
     <div className='flex justify-center'>
       
     <form className="w-full max-w-sm" onSubmit={handleSubmit}>
-      <h2 className='font-bold text-4xl text-center my-10'>Welcome To Allens World</h2>
+      <h2 className='font-bold text-4xl text-center my-10'>Welcome To Allen&apos;s World</h2>
       <div className="flex items-center border border-2 rounded-lg m-5 border-teal-500 py-2">
         <input
           className="appearance-none bg-transparent border-none w-full dark:text-white text-gray-700 mr-3 px-2 focus:outline-none"
@@ -98,11 +109,16 @@ function Chatbox() {
           Submit
         </button>
       </div>
-      {response && (
+      {!loading? 
         <div className="px-5 py-3 mt-3 text-center text-gray-600 dark:text-white">
-          <b>AI:</b> {response}
-        </div>
-      )}
+         {error? (<p>You need to refresh the page, max context has been reached.</p>
+         ): (
+          <>{response && <p><b>AI:</b> {response}</p>}</>
+          )}</div> 
+          :
+           <div className='px-5 py-3 mt-3 flex justify-center'><BiLoaderCircle className='animate-spin-slow text-xl'/></div>
+        
+      }
     </form>
     </div>
     </div>
