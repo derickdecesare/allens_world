@@ -92,7 +92,7 @@ function Chatbox() {
     <div className='flex justify-center'>
       
     <form className="w-full max-w-sm" onSubmit={handleSubmit}>
-      <h2 className='font-bold text-4xl text-center my-10'>Welcome To Allen&apos;s World</h2>
+      <h2 className='font-bold text-4xl text-center my-10'>Welcome To Allen&apos;s New Reality</h2>
       <div className="flex items-center border border-2 rounded-lg m-5 border-teal-500 py-2">
         <input
           className="appearance-none bg-transparent border-none w-full dark:text-white text-gray-700 mr-3 px-2 focus:outline-none"
