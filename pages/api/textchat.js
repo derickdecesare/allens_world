@@ -1,16 +1,15 @@
-
+import { useState } from 'react';
 
 
 export default async function handler (req, res) {
-
+const [message, setMessage] = useState('');
 const { MessagingResponse } = require('twilio').twiml;
 const twiml = new MessagingResponse();
 
 console.log(req.body) 
 console.log(req.body.Body) //this is the message
+const incomingMessage = req.body.Body
 
-console.log('editing api')
-    console.log('api started')
     const accountSid = process.env.TWILIO_ACCOUNT_SID
     const authToken = process.env.TWILIO_AUTH_TOKEN
     const client = require('twilio')(accountSid, authToken)
@@ -22,7 +21,27 @@ console.log('editing api')
     // })
     // .then(message => console.log(message.sid))
 
-    twiml.message('Hello, thanks for texting us!');
+
+    fetch('/api/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: incomingMessage }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status == 200) {
+          setMessage(data.message)
+         }
+      });
+  
+      
+    
+
+
+
+
+
+    twiml.message(message);
       // Set the Content-Type header and send the response
       res.setHeader('Content-Type', 'text/xml');
       res.status(200).send(twiml.toString());
